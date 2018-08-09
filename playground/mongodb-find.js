@@ -20,5 +20,7 @@ MongoClient.connect('mongodb://localhost:27017/',{ useNewUrlParser: true },(erro
     },(err)=>{
         console.log('Unable to count todos ',err);
     });
+
+    
     //client.close();
 });
