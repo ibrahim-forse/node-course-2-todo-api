@@ -1,12 +1,15 @@
-var express = require('express');
-var bodyParser = require('body-parser');
+const express = require('express');
+const bodyParser = require('body-parser');
+const _ = require('lodash');
 
-var {ObjectID} = require('mongodb')
-var {mongoose} = require('./db/mongoose');
-var {Todo} = require('./models/todo');
-var {User} = require('./models/user');
+const {ObjectID} = require('mongodb')
+const {mongoose} = require('./db/mongoose');
+const {Todo} = require('./models/todo');
+const {User} = require('./models/user');
 
 var app = express();
+const port = process.env.PORT || 3000;
+
 app.use(bodyParser.json());
 
 app.post('/todos',(req,res)=>{
@@ -28,6 +31,20 @@ app.get('/todos',(req,res)=>{
             todos: todos
         });
     })
+},(error)=>{
+    res.status(400).send(error);
+});
+
+app.post('/users',(req,res)=>{
+    var body = _.pick(req.body,['email','password','name']);
+    var user = new User(body);
+    user.save(user).then(()=>{
+        return user.generateAuthToken();
+    }).then((token)=>{
+        res.header('x-auth',token).send(user);
+    }).catch((error)=>{
+        res.status(400).send(error);
+    });
 },(error)=>{
     res.status(400).send(error);
 });
@@ -54,8 +71,8 @@ app.get('/todos/:id',(req,res)=>{
     });
 });
 
-app.listen(3000,()=>{
-    console.log('Started on port 3000')
+app.listen(port,()=>{
+    console.log(`Started on port ${port}`)
 });
 
 
